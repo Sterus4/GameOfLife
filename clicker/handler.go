@@ -12,9 +12,14 @@ func HandleStopRenderButton(state *game.State) {
 
 func HandleClearButton(state *game.State) {
 	state.NeedToClearMatrix = true
+	state.StopUpdateFlag = true
 	fmt.Println("Clear matrix")
 }
 
 func HandleRandomizeButton(state *game.State) {
 	game.RandomizeMatrix(state)
+}
+
+func HandleExitButton(state *game.State) {
+	state.NeedToExit = true
 }

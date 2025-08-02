@@ -9,6 +9,7 @@ type State struct {
 	CountOfBlocksVertical   int
 	CountOfBlocksHorizontal int
 	BlockSize               int
+	NeedToExit              bool
 }
 
 func RandomizeMatrix(state *State) {
