@@ -11,6 +11,12 @@ const sliderBorderWidth = 2
 const sliderSpan = 10
 
 func (slider *GameSlider) ProcessClick(x, y int, state *game.State) bool {
+	if !slider.IsHit(x, y) {
+		return false
+	}
+
+	var newVal = (slider.MaxValue - slider.MinValue) * (x - slider.Rect.LeftX) / slider.Rect.Width
+	*slider.CurrentValue = newVal
 	return true
 }
 
@@ -27,6 +33,10 @@ func (slider *GameSlider) Draw(screen *ebiten.Image) {
 	centerByX := slider.Rect.Width * *slider.CurrentValue / (slider.MaxValue - slider.MinValue)
 	vector.DrawFilledRect(screen, float32(slider.Rect.LeftX+centerByX-sliderSpan/2), float32(slider.Rect.TopY), float32(sliderSpan), float32(slider.Rect.Height), slider.Rect.SecondaryColor, false)
 	vector.DrawFilledRect(screen, float32(slider.Rect.LeftX+centerByX-sliderSpan/2+sliderBorderWidth), float32(slider.Rect.TopY+sliderBorderWidth), float32(sliderSpan-2*sliderBorderWidth), float32(slider.Rect.Height-2*sliderBorderWidth), slider.Rect.MainColor, false)
+}
+
+func (slider *GameSlider) IsHit(x, y int) bool {
+	return x > slider.Rect.LeftX && x < slider.Rect.LeftX+slider.Rect.Width && y > slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2 && y < slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2+sliderSpan
 }
 
 func DrawSliders(sliders []*GameSlider, screen *ebiten.Image) {

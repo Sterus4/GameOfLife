@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"image/color"
@@ -21,8 +20,7 @@ type GameButton struct {
 }
 
 func (button *GameButton) draw(screen *ebiten.Image) {
-	vector.DrawFilledRect(screen, float32(button.Rect.LeftX)-buttonBorderWidth, float32(button.Rect.TopY)-buttonBorderWidth, float32(button.Rect.Width)+buttonBorderWidth*2, float32(button.Rect.Height)+buttonBorderWidth*2, button.Rect.SecondaryColor, false)
-	vector.DrawFilledRect(screen, float32(button.Rect.LeftX), float32(button.Rect.TopY), float32(button.Rect.Width), float32(button.Rect.Height), button.Rect.MainColor, false)
+	button.Rect.DrawRectWithBorder(screen, buttonBorderWidth)
 	fontFace := basicfont.Face7x13
 
 	bounds, _ := font.BoundString(fontFace, button.Name)
@@ -40,12 +38,12 @@ func (button *GameButton) IsHit(x, y int) bool {
 }
 
 func (button *GameButton) ProcessClick(x, y int, state *game.State) bool {
-	if button.IsHit(x, y) {
-		fmt.Printf("button '%s' pressed\n", button.Name)
-		button.Handle(state)
-		return true
+	if !button.IsHit(x, y) {
+		return false
 	}
-	return false
+	fmt.Printf("button '%s' pressed\n", button.Name)
+	button.Handle(state)
+	return true
 }
 
 func DrawButtons(buttons []*GameButton, screen *ebiten.Image) {

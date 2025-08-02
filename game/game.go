@@ -12,6 +12,35 @@ type State struct {
 	NeedToExit              bool
 }
 
+func CountOfNeighbours(state *State, y, x int) int {
+	var result int
+	if state.GameMatrix[y][x-1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y][x+1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y-1][x-1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y-1][x+1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y+1][x-1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y+1][x+1].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y-1][x].IsFilledOld {
+		result += 1
+	}
+	if state.GameMatrix[y+1][x].IsFilledOld {
+		result += 1
+	}
+	return result
+}
+
 func RandomizeMatrix(state *State) {
 	for i := 1; i < len(state.GameMatrix)-1; i++ {
 		for j := 1; j < len(state.GameMatrix[i])-1; j++ {

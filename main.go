@@ -21,7 +21,7 @@ const GameScreenWidth = 640
 const GameScreenHeight = 480
 const RealScreenSWidth = 1920
 const RealScreenSHeight = 1080
-const minFrateRate = 1
+const minFrateRate = 3
 const maxFrameRate = 60
 const fpsShowerLabelString = "Current fps"
 
@@ -125,12 +125,16 @@ var sliders = []*slider.GameSlider{
 	speedSlider,
 }
 
-var clickables = []clicker.Clickable{
+var singleClickables = []clicker.Clickable{
 	stopButton,
 	clearButton,
 	randomizeButton,
 	exitButton,
 	fpsShowerLabel,
+}
+
+var longClickables = []clicker.Clickable{
+	speedSlider,
 }
 
 var state = game.State{
@@ -143,35 +147,6 @@ var state = game.State{
 
 type Game struct {
 	isFullScreenMode bool
-}
-
-func countOfNeighbours(y, x int) int {
-	var result int
-	if state.GameMatrix[y][x-1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y][x+1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y-1][x-1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y-1][x+1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y+1][x-1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y+1][x+1].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y-1][x].IsFilledOld {
-		result += 1
-	}
-	if state.GameMatrix[y+1][x].IsFilledOld {
-		result += 1
-	}
-	return result
 }
 
 func calculateLeftTopDotOfSquare(xPosition, yPosition int) (topLeftX, topLeftY int) {
@@ -188,7 +163,9 @@ func (g *Game) Update() error {
 	}
 	changeButtonName(fpsShowerLabel, fmt.Sprintf("%s: %d", fpsShowerLabelString, GameFrameRate))
 	clicker.ProcessDrawingDot(state)
-	clicker.ProcessMouseClick(clickables, &state)
+	clicker.ProcessSingleMouseClick(singleClickables, &state)
+	clicker.ProcessLongMouseClick(longClickables, &state)
+	ebiten.SetTPS(GameFrameRate)
 	if state.NeedToClearMatrix {
 		for i := 1; i < len(state.GameMatrix)-1; i++ {
 			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
@@ -202,7 +179,7 @@ func (g *Game) Update() error {
 		changeButtonName(stopButton, "Stop")
 		for i := 1; i < len(state.GameMatrix)-1; i++ {
 			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
-				neighbours := countOfNeighbours(i, j)
+				neighbours := game.CountOfNeighbours(&state, i, j)
 				if state.GameMatrix[i][j].IsFilledOld {
 					if neighbours != 2 && neighbours != 3 {
 						state.GameMatrix[i][j].IsFilledNew = false
@@ -261,7 +238,6 @@ func main() {
 
 	ebiten.SetWindowSize(RealScreenSWidth, RealScreenSHeight)
 	ebiten.SetFullscreen(true)
-	ebiten.SetTPS(GameFrameRate)
 
 	state.GameMatrix = make([][]game.Square, countOfVerticalBlocks)
 	for i := 0; i < countOfVerticalBlocks; i++ {
