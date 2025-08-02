@@ -52,9 +52,27 @@ func (button *Button) Draw(screen *ebiten.Image) {
 	text.Draw(screen, button.Name, fontFace, textX, textY, color.White)
 }
 
+func notValidClick(x, y int) bool {
+	width, height := ebiten.WindowSize()
+	return x < 0 || y < 0 || x > width || y > height
+}
+
 func DrawButtons(buttons []Button, screen *ebiten.Image) {
 	for _, elem := range buttons {
 		elem.Draw(screen)
+	}
+}
+
+func ProcessDrawingDot(state game.State) {
+	if state.StopUpdateFlag {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			x, y := ebiten.CursorPosition()
+			if notValidClick(x, y) {
+				return
+			}
+			fmt.Printf("Matrix pressed: X=%d, Y=%d\n", x, y)
+			game.DrawDot(state, x, y)
+		}
 	}
 }
 
@@ -62,7 +80,9 @@ func ProcessMouseClick(buttons []Button, state *game.State) {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		if !mousePressed {
 			x, y := ebiten.CursorPosition()
-			fmt.Printf("Button pressed: X=%d, Y=%d\n", x, y)
+			if notValidClick(x, y) {
+				return
+			}
 			mousePressed = true
 			processButton(x, y, buttons, state)
 		}

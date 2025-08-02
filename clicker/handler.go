@@ -14,3 +14,7 @@ func HandleClearButton(state *game.State) {
 	state.NeedToClearMatrix = true
 	fmt.Println("Clear matrix")
 }
+
+func HandleRandomizeButton(state *game.State) {
+	game.RandomizeMatrix(state)
+}

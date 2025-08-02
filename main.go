@@ -8,7 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
 	"log"
-	"math/rand"
 )
 
 const LineWidth = 1
@@ -43,66 +42,56 @@ var buttons = []clicker.Button{
 		Handle: clicker.HandleClearButton,
 		Color:  BlackColor,
 	},
+	{
+		Name:   "Randomize",
+		LeftX:  GlobalScreenWidth - 240,
+		TopY:   GlobalScreenHeight - 60,
+		Width:  80,
+		Height: 40,
+		Handle: clicker.HandleRandomizeButton,
+		Color:  BlackColor,
+	},
 }
 
 var state = game.State{
-	StopUpdateFlag:    false,
-	NeedToClearMatrix: false,
-}
-
-type GameSquare struct {
-	isFilledOld bool
-	isFilledNew bool
+	StopUpdateFlag:          false,
+	NeedToClearMatrix:       false,
+	CountOfBlocksVertical:   countOfVerticalBlocks,
+	CountOfBlocksHorizontal: countOfHorizontalBlocks,
+	BlockSize:               BlockSize,
 }
 
 type Game struct {
-	GameMatrix       [][]GameSquare
 	isFullScreenMode bool
 }
 
-func countOfNeighbours(g *Game, y, x int) int {
+func countOfNeighbours(y, x int) int {
 	var result int
-	if g.GameMatrix[y][x-1].isFilledOld {
+	if state.GameMatrix[y][x-1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y][x+1].isFilledOld {
+	if state.GameMatrix[y][x+1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y-1][x-1].isFilledOld {
+	if state.GameMatrix[y-1][x-1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y-1][x+1].isFilledOld {
+	if state.GameMatrix[y-1][x+1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y+1][x-1].isFilledOld {
+	if state.GameMatrix[y+1][x-1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y+1][x+1].isFilledOld {
+	if state.GameMatrix[y+1][x+1].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y-1][x].isFilledOld {
+	if state.GameMatrix[y-1][x].IsFilledOld {
 		result += 1
 	}
-	if g.GameMatrix[y+1][x].isFilledOld {
+	if state.GameMatrix[y+1][x].IsFilledOld {
 		result += 1
 	}
 	return result
-}
-
-func randomizeMatrix(g *Game) {
-	for i := 1; i < len(g.GameMatrix)-1; i++ {
-		for j := 1; j < len(g.GameMatrix[i])-1; j++ {
-			myRand := rand.Float32()
-			if myRand < 0.5 {
-				g.GameMatrix[i][j].isFilledOld = true
-				g.GameMatrix[i][j].isFilledNew = true
-			} else {
-				g.GameMatrix[i][j].isFilledOld = false
-				g.GameMatrix[i][j].isFilledNew = false
-			}
-		}
-	}
-
 }
 
 func calculateLeftTopDotOfSquare(xPosition, yPosition int) (topLeftX, topLeftY int) {
@@ -110,34 +99,35 @@ func calculateLeftTopDotOfSquare(xPosition, yPosition int) (topLeftX, topLeftY i
 }
 
 func (g *Game) Update() error {
+	clicker.ProcessDrawingDot(state)
 	clicker.ProcessMouseClick(buttons, &state)
 	if state.NeedToClearMatrix {
-		for i := 1; i < len(g.GameMatrix)-1; i++ {
-			for j := 1; j < len(g.GameMatrix[i])-1; j++ {
-				g.GameMatrix[i][j].isFilledOld = false
-				g.GameMatrix[i][j].isFilledNew = false
+		for i := 1; i < len(state.GameMatrix)-1; i++ {
+			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+				state.GameMatrix[i][j].IsFilledOld = false
+				state.GameMatrix[i][j].IsFilledNew = false
 			}
 		}
 		state.NeedToClearMatrix = false
 	}
 	if !state.StopUpdateFlag {
-		for i := 1; i < len(g.GameMatrix)-1; i++ {
-			for j := 1; j < len(g.GameMatrix[i])-1; j++ {
-				neighbours := countOfNeighbours(g, i, j)
-				if g.GameMatrix[i][j].isFilledOld {
+		for i := 1; i < len(state.GameMatrix)-1; i++ {
+			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+				neighbours := countOfNeighbours(i, j)
+				if state.GameMatrix[i][j].IsFilledOld {
 					if neighbours != 2 && neighbours != 3 {
-						g.GameMatrix[i][j].isFilledNew = false
+						state.GameMatrix[i][j].IsFilledNew = false
 					}
 				} else {
 					if neighbours == 3 {
-						g.GameMatrix[i][j].isFilledNew = true
+						state.GameMatrix[i][j].IsFilledNew = true
 					}
 				}
 			}
 		}
-		for i := 1; i < len(g.GameMatrix)-1; i++ {
-			for j := 1; j < len(g.GameMatrix[i])-1; j++ {
-				g.GameMatrix[i][j].isFilledOld = g.GameMatrix[i][j].isFilledNew
+		for i := 1; i < len(state.GameMatrix)-1; i++ {
+			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+				state.GameMatrix[i][j].IsFilledOld = state.GameMatrix[i][j].IsFilledNew
 			}
 		}
 	}
@@ -153,12 +143,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		vector.DrawFilledRect(screen, 0, float32(i*BlockSize+SquareEdgeSize), GlobalScreenWidth, LineWidth, WhiteColor, false)
 	}
 
-	for i := 1; i < len(g.GameMatrix)-2; i++ {
-		for j := 1; j < len(g.GameMatrix[i])-2; j++ {
+	for i := 1; i < len(state.GameMatrix)-2; i++ {
+		for j := 1; j < len(state.GameMatrix[i])-2; j++ {
 
-			gameSquare := g.GameMatrix[i][j]
+			gameSquare := state.GameMatrix[i][j]
 			var squareColor color.Color
-			if gameSquare.isFilledOld {
+			if gameSquare.IsFilledOld {
 				squareColor = WhiteColor
 			} else {
 				squareColor = BlackColor
@@ -181,11 +171,11 @@ func main() {
 	ebiten.SetFullscreen(g.isFullScreenMode)
 	ebiten.SetTPS(GameFrameRate)
 
-	g.GameMatrix = make([][]GameSquare, countOfVerticalBlocks)
+	state.GameMatrix = make([][]game.Square, countOfVerticalBlocks)
 	for i := 0; i < countOfVerticalBlocks; i++ {
-		g.GameMatrix[i] = make([]GameSquare, countOfHorizontalBlocks)
+		state.GameMatrix[i] = make([]game.Square, countOfHorizontalBlocks)
 	}
-	randomizeMatrix(g)
+	game.RandomizeMatrix(&state)
 
 	ebiten.SetWindowTitle("Game of life!")
 	if err := ebiten.RunGame(g); err != nil {
