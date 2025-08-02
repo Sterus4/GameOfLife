@@ -19,7 +19,7 @@ type GameButton struct {
 	Handle func(*game.State)
 }
 
-func (button *GameButton) draw(screen *ebiten.Image) {
+func (button *GameButton) Draw(screen *ebiten.Image) {
 	button.Rect.DrawRectWithBorder(screen, buttonBorderWidth)
 	fontFace := basicfont.Face7x13
 
@@ -44,10 +44,4 @@ func (button *GameButton) ProcessClick(x, y int, state *game.State) bool {
 	fmt.Printf("button '%s' pressed\n", button.Name)
 	button.Handle(state)
 	return true
-}
-
-func DrawButtons(buttons []*GameButton, screen *ebiten.Image) {
-	for _, elem := range buttons {
-		elem.draw(screen)
-	}
 }

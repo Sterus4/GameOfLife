@@ -3,6 +3,7 @@ package main
 import (
 	"GameOfLife/clicker"
 	"GameOfLife/clicker/button"
+	"GameOfLife/clicker/notification"
 	"GameOfLife/clicker/slider"
 	"GameOfLife/game"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
 	"log"
+	"time"
 )
 
 const LineWidth = 1
@@ -19,8 +21,8 @@ const SquareEdgeSize = 15
 const BlockSize = LineWidth + SquareEdgeSize
 const GameScreenWidth = 640
 const GameScreenHeight = 480
-const RealScreenSWidth = 1920
-const RealScreenSHeight = 1080
+const RealScreenSWidth = 640
+const RealScreenSHeight = 480
 const minFrateRate = 3
 const maxFrameRate = 60
 const fpsShowerLabelString = "Current fps"
@@ -113,15 +115,23 @@ var speedSlider = &slider.GameSlider{
 	MaxValue:     maxFrameRate,
 }
 
-var buttons = []*button.GameButton{
+// TODO разобраться с выводом текста в несколько строке
+var needToPauseNotification = &notification.NotificationImpl{
+	Text:     "You should press stop button",
+	Duration: 3 * time.Second,
+	IsOnTop:  false,
+}
+
+var notifications = []clicker.Notification{
+	needToPauseNotification,
+}
+
+var drawables = []clicker.Drawable{
 	stopButton,
 	clearButton,
 	randomizeButton,
 	exitButton,
 	fpsShowerLabel,
-}
-
-var sliders = []*slider.GameSlider{
 	speedSlider,
 }
 
@@ -162,7 +172,7 @@ func (g *Game) Update() error {
 		return errors.New("exiting")
 	}
 	changeButtonName(fpsShowerLabel, fmt.Sprintf("%s: %d", fpsShowerLabelString, GameFrameRate))
-	clicker.ProcessDrawingDot(state)
+	clicker.ProcessDrawingDot(state, needToPauseNotification)
 	clicker.ProcessSingleMouseClick(singleClickables, &state)
 	clicker.ProcessLongMouseClick(longClickables, &state)
 	ebiten.SetTPS(GameFrameRate)
@@ -225,8 +235,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.DrawFilledRect(screen, float32(x), float32(y), SquareEdgeSize, SquareEdgeSize, squareColor, false)
 		}
 	}
-	button.DrawButtons(buttons, screen)
-	slider.DrawSliders(sliders, screen)
+	clicker.DrawDrawables(drawables, screen)
+	clicker.DrawNotifications(notifications, screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

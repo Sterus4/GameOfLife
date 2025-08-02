@@ -7,7 +7,6 @@ import (
 
 func HandleStopRenderButton(state *game.State) {
 	state.StopUpdateFlag = !state.StopUpdateFlag
-	fmt.Println("Stop Render Button pressed")
 }
 
 func HandleClearButton(state *game.State) {
