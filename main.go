@@ -1,16 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"log"
 )
 
-func main() {
-	s := "gopher"
-	fmt.Printf("Hello and welcome, %s!\n", s)
+type Game struct{}
 
-	for i := 1; i <= 5; i++ {
-		//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-		fmt.Println("i =", 100/i)
+func (g *Game) Update() error {
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, "Hel123lo, World!")
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 320, 240
+}
+
+func main() {
+	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowTitle("Hello, World!")
+	if err := ebiten.RunGame(&Game{}); err != nil {
+		log.Fatal(err)
 	}
 }
