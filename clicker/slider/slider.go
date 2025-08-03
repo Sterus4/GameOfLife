@@ -1,8 +1,7 @@
 package slider
 
 import (
-	"GameOfLife/clicker"
-	"GameOfLife/game"
+	"GameOfLife/clicker/plot"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -10,18 +9,19 @@ import (
 const sliderBorderWidth = 2
 const sliderSpan = 10
 
-func (slider *GameSlider) ProcessClick(x, y int, state *game.State) bool {
+func (slider *GameSlider) ProcessClick(x, y int) bool {
 	if !slider.IsHit(x, y) {
 		return false
 	}
-
 	var newVal = (slider.MaxValue - slider.MinValue) * (x - slider.Rect.LeftX) / slider.Rect.Width
+	newVal = max(newVal, slider.MinValue)
+	newVal = min(newVal, slider.MaxValue)
 	*slider.CurrentValue = newVal
 	return true
 }
 
 type GameSlider struct {
-	Rect         clicker.MyRect
+	Rect         plot.MyRect
 	CurrentValue *int
 	MinValue     int
 	MaxValue     int
@@ -37,10 +37,4 @@ func (slider *GameSlider) Draw(screen *ebiten.Image) {
 
 func (slider *GameSlider) IsHit(x, y int) bool {
 	return x > slider.Rect.LeftX && x < slider.Rect.LeftX+slider.Rect.Width && y > slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2 && y < slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2+sliderSpan
-}
-
-func DrawSliders(sliders []*GameSlider, screen *ebiten.Image) {
-	for _, elem := range sliders {
-		elem.Draw(screen)
-	}
 }

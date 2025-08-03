@@ -1,8 +1,7 @@
 package button
 
 import (
-	"GameOfLife/clicker"
-	"GameOfLife/game"
+	"GameOfLife/clicker/plot"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -14,9 +13,9 @@ import (
 const buttonBorderWidth = 2
 
 type GameButton struct {
-	Rect   clicker.MyRect
+	Rect   plot.MyRect
 	Name   string
-	Handle func(*game.State)
+	Handle func()
 }
 
 func (button *GameButton) Draw(screen *ebiten.Image) {
@@ -37,11 +36,11 @@ func (button *GameButton) IsHit(x, y int) bool {
 	return x >= button.Rect.LeftX && x <= button.Rect.LeftX+button.Rect.Width && y >= button.Rect.TopY && y <= button.Rect.TopY+button.Rect.Height
 }
 
-func (button *GameButton) ProcessClick(x, y int, state *game.State) bool {
+func (button *GameButton) ProcessClick(x, y int) bool {
 	if !button.IsHit(x, y) {
 		return false
 	}
 	fmt.Printf("button '%s' pressed\n", button.Name)
-	button.Handle(state)
+	button.Handle()
 	return true
 }
