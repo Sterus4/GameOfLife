@@ -10,8 +10,10 @@ type Hittable interface {
 
 type Clickable interface {
 	ProcessClick(x, y int) bool
+	IsClickable() bool
 }
 
 type Drawable interface {
 	Draw(screen *ebiten.Image)
+	IsVisible() bool
 }

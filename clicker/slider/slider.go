@@ -25,6 +25,8 @@ type GameSlider struct {
 	CurrentValue *int
 	MinValue     int
 	MaxValue     int
+	Visible      bool
+	IsActive     bool
 }
 
 func (slider *GameSlider) Draw(screen *ebiten.Image) {
@@ -33,6 +35,14 @@ func (slider *GameSlider) Draw(screen *ebiten.Image) {
 	centerByX := slider.Rect.Width * *slider.CurrentValue / (slider.MaxValue - slider.MinValue)
 	vector.DrawFilledRect(screen, float32(slider.Rect.LeftX+centerByX-sliderSpan/2), float32(slider.Rect.TopY), float32(sliderSpan), float32(slider.Rect.Height), slider.Rect.SecondaryColor, false)
 	vector.DrawFilledRect(screen, float32(slider.Rect.LeftX+centerByX-sliderSpan/2+sliderBorderWidth), float32(slider.Rect.TopY+sliderBorderWidth), float32(sliderSpan-2*sliderBorderWidth), float32(slider.Rect.Height-2*sliderBorderWidth), slider.Rect.MainColor, false)
+}
+
+func (slider *GameSlider) IsVisible() bool {
+	return slider.Visible
+}
+
+func (button *GameSlider) IsClickable() bool {
+	return button.IsActive
 }
 
 func (slider *GameSlider) IsHit(x, y int) bool {

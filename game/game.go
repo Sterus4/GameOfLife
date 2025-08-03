@@ -38,7 +38,9 @@ var stopButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle: HandleStopRenderButton,
+	Handle:   HandleStopRenderButton,
+	IsActive: true,
+	Visible:  true,
 }
 
 var clearButton = &button.GameButton{
@@ -51,7 +53,9 @@ var clearButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle: HandleClearButton,
+	Handle:   HandleClearButton,
+	IsActive: true,
+	Visible:  true,
 }
 
 var randomizeButton = &button.GameButton{
@@ -64,7 +68,9 @@ var randomizeButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle: HandleRandomizeButton,
+	Handle:   HandleRandomizeButton,
+	IsActive: true,
+	Visible:  true,
 }
 
 var exitButton = &button.GameButton{
@@ -77,7 +83,9 @@ var exitButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle: HandleExitButton,
+	Handle:   HandleExitButton,
+	IsActive: true,
+	Visible:  true,
 }
 
 var fpsShowerLabel = &button.GameButton{
@@ -90,7 +98,9 @@ var fpsShowerLabel = &button.GameButton{
 		MainColor:      plot.PurpleColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle: func() {},
+	Handle:   func() {},
+	IsActive: false,
+	Visible:  true,
 }
 
 var speedSlider = &slider.GameSlider{
@@ -105,6 +115,8 @@ var speedSlider = &slider.GameSlider{
 	CurrentValue: &FrameRate,
 	MinValue:     minFrateRate,
 	MaxValue:     maxFrameRate,
+	IsActive:     false,
+	Visible:      true,
 }
 
 var needToPauseNotification = &notification.Notification{
@@ -216,7 +228,17 @@ func ProcessDrawingDot() {
 			if notValidClick(x, y) {
 				return
 			}
-			DrawDot(state, x, y)
+			SetDot(state, x, y, true)
+		} else if !someButtonPressed(x, y) {
+			needToPauseNotification.Popup()
+		}
+	} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+		x, y := ebiten.CursorPosition()
+		if state.StopUpdateFlag {
+			if notValidClick(x, y) {
+				return
+			}
+			SetDot(state, x, y, false)
 		} else if !someButtonPressed(x, y) {
 			needToPauseNotification.Popup()
 		}
@@ -224,12 +246,12 @@ func ProcessDrawingDot() {
 }
 
 func someButtonPressed(x, y int) bool {
-	return stopButton.IsHit(x, y) ||
-		clearButton.IsHit(x, y) ||
-		randomizeButton.IsHit(x, y) ||
-		exitButton.IsHit(x, y) ||
-		fpsShowerLabel.IsHit(x, y) ||
-		speedSlider.IsHit(x, y)
+	return stopButton.IsHit(x, y) && stopButton.IsClickable() ||
+		clearButton.IsHit(x, y) && clearButton.IsClickable() ||
+		randomizeButton.IsHit(x, y) && randomizeButton.IsClickable() ||
+		exitButton.IsHit(x, y) && exitButton.IsClickable() ||
+		fpsShowerLabel.IsHit(x, y) && fpsShowerLabel.IsClickable() ||
+		speedSlider.IsHit(x, y) && speedSlider.IsClickable()
 }
 
 func calculateLeftTopDotOfSquare(xPosition, yPosition int) (topLeftX, topLeftY int) {
@@ -302,10 +324,10 @@ type Square struct {
 	IsFilledNew bool
 }
 
-func DrawDot(state *State, x, y int) {
+func SetDot(state *State, x, y int, active bool) {
 	dotX, dotY := x/state.BlockSize+1, y/state.BlockSize+1
-	state.GameMatrix[dotY][dotX].IsFilledOld = true
-	state.GameMatrix[dotY][dotX].IsFilledNew = true
+	state.GameMatrix[dotY][dotX].IsFilledOld = active
+	state.GameMatrix[dotY][dotX].IsFilledNew = active
 }
 
 func changeButtonName(button *button.GameButton, newName string) {

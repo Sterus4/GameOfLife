@@ -32,6 +32,9 @@ func ProcessSingleMouseClick(clickables []plot.Clickable) {
 			}
 			mousePressed = true
 			for _, clickable := range clickables {
+				if !clickable.IsClickable() {
+					continue
+				}
 				if clickable.ProcessClick(x, y) {
 					break
 				}
@@ -58,6 +61,8 @@ func ProcessLongMouseClick(clickables []plot.Clickable) {
 
 func DrawDrawables(drawables []plot.Drawable, screen *ebiten.Image) {
 	for _, elem := range drawables {
-		elem.Draw(screen)
+		if elem.IsVisible() {
+			elem.Draw(screen)
+		}
 	}
 }
