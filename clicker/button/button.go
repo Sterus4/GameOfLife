@@ -13,11 +13,12 @@ import (
 const buttonBorderWidth = 2
 
 type GameButton struct {
-	Rect     plot.MyRect
-	Name     string
-	Handle   func()
-	Visible  bool
-	IsActive bool
+	Rect        plot.MyRect
+	Name        string
+	Handle      func()
+	Visible     bool
+	IsActive    bool
+	IsHoverable bool
 }
 
 func (button *GameButton) Draw(screen *ebiten.Image) {

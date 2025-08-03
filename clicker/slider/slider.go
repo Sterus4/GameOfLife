@@ -46,5 +46,5 @@ func (button *GameSlider) IsClickable() bool {
 }
 
 func (slider *GameSlider) IsHit(x, y int) bool {
-	return x > slider.Rect.LeftX && x < slider.Rect.LeftX+slider.Rect.Width && y > slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2 && y < slider.Rect.TopY+slider.Rect.Height/2-sliderSpan/2+sliderSpan
+	return x > slider.Rect.LeftX && x < slider.Rect.LeftX+slider.Rect.Width && y > slider.Rect.TopY && y < slider.Rect.TopY+slider.Rect.Height
 }

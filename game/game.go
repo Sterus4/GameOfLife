@@ -38,24 +38,26 @@ var stopButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle:   HandleStopRenderButton,
-	IsActive: true,
-	Visible:  true,
+	Handle:      HandleStopRenderButton,
+	IsActive:    true,
+	Visible:     true,
+	IsHoverable: true,
 }
 
 var clearButton = &button.GameButton{
 	Name: "Clear",
 	Rect: plot.MyRect{
-		LeftX:/*GameScreenWidth - 150*/ 0,
-		TopY:/*GameScreenHeight - 60*/ 0,
+		LeftX:          0,
+		TopY:           0,
 		Width:          60,
 		Height:         40,
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle:   HandleClearButton,
-	IsActive: true,
-	Visible:  true,
+	Handle:      HandleClearButton,
+	IsActive:    true,
+	Visible:     true,
+	IsHoverable: true,
 }
 
 var randomizeButton = &button.GameButton{
@@ -68,9 +70,10 @@ var randomizeButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle:   HandleRandomizeButton,
-	IsActive: true,
-	Visible:  true,
+	Handle:      HandleRandomizeButton,
+	IsActive:    true,
+	Visible:     true,
+	IsHoverable: true,
 }
 
 var exitButton = &button.GameButton{
@@ -83,9 +86,10 @@ var exitButton = &button.GameButton{
 		MainColor:      plot.BlackColor,
 		SecondaryColor: plot.LightPurpleColor,
 	},
-	Handle:   HandleExitButton,
-	IsActive: true,
-	Visible:  true,
+	Handle:      HandleExitButton,
+	IsActive:    true,
+	Visible:     true,
+	IsHoverable: true,
 }
 
 var fpsShowerLabel = &button.GameButton{
@@ -115,7 +119,7 @@ var speedSlider = &slider.GameSlider{
 	CurrentValue: &FrameRate,
 	MinValue:     minFrateRate,
 	MaxValue:     maxFrameRate,
-	IsActive:     false,
+	IsActive:     true,
 	Visible:      true,
 }
 
@@ -151,7 +155,13 @@ var singleClickables = []plot.Clickable{
 	clearButton,
 	randomizeButton,
 	exitButton,
-	fpsShowerLabel,
+}
+
+var hoverableButtons = []*button.GameButton{
+	stopButton,
+	clearButton,
+	randomizeButton,
+	exitButton,
 }
 
 var longClickables = []plot.Clickable{
@@ -400,6 +410,7 @@ func UpdateMainScreen() error {
 	timeBetweenUpdate = time.Second / time.Duration(FrameRate)
 	changeButtonName(fpsShowerLabel, fmt.Sprintf("%s: %d", fpsShowerLabelString, FrameRate))
 	ProcessDrawingDot()
+	ProcessMousePosition()
 	clicker.ProcessSingleMouseClick(singleClickables)
 	clicker.ProcessLongMouseClick(longClickables)
 
@@ -417,4 +428,42 @@ func UpdateMainScreen() error {
 		changeButtonName(stopButton, "Start")
 	}
 	return nil
+}
+
+func ProcessMousePosition() {
+	x, y := ebiten.CursorPosition()
+	for _, elem := range hoverableButtons {
+		rM, gM, bM, _ := elem.Rect.MainColor.RGBA()
+		rS, gS, bS, _ := elem.Rect.SecondaryColor.RGBA()
+		if elem.IsHoverable {
+
+			if elem.IsHit(x, y) {
+				elem.Rect.MainColor = color.Color(color.RGBA{
+					R: uint8(rM),
+					G: uint8(gM),
+					B: uint8(bM),
+					A: 0xff,
+				})
+				elem.Rect.SecondaryColor = color.Color(color.RGBA{
+					R: uint8(rS),
+					G: uint8(gS),
+					B: uint8(bS),
+					A: 0xff,
+				})
+			} else {
+				elem.Rect.MainColor = color.Color(color.RGBA{
+					R: uint8(rM),
+					G: uint8(gM),
+					B: uint8(bM),
+					A: 0xaa,
+				})
+				elem.Rect.SecondaryColor = color.Color(color.RGBA{
+					R: uint8(rS),
+					G: uint8(gS),
+					B: uint8(bS),
+					A: 0xaa,
+				})
+			}
+		}
+	}
 }
