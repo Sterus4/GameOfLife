@@ -25,6 +25,8 @@ const (
 )
 
 var FrameRate = 10
+var lastUpdate = time.Now()
+var timeBetweenUpdate = time.Second * time.Duration(FrameRate) / 60
 
 var stopButton = &button.GameButton{
 	Name: "Stop",
@@ -310,6 +312,37 @@ func changeButtonName(button *button.GameButton, newName string) {
 	button.Name = newName
 }
 
+func clearMatrix() {
+	for i := 1; i < len(state.GameMatrix)-1; i++ {
+		for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+			state.GameMatrix[i][j].IsFilledOld = false
+			state.GameMatrix[i][j].IsFilledNew = false
+		}
+	}
+}
+
+func oneGameTick() {
+	for i := 1; i < len(state.GameMatrix)-1; i++ {
+		for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+			neighbours := CountOfNeighbours(state, i, j)
+			if state.GameMatrix[i][j].IsFilledOld {
+				if neighbours != 2 && neighbours != 3 {
+					state.GameMatrix[i][j].IsFilledNew = false
+				}
+			} else {
+				if neighbours == 3 {
+					state.GameMatrix[i][j].IsFilledNew = true
+				}
+			}
+		}
+	}
+	for i := 1; i < len(state.GameMatrix)-1; i++ {
+		for j := 1; j < len(state.GameMatrix[i])-1; j++ {
+			state.GameMatrix[i][j].IsFilledOld = state.GameMatrix[i][j].IsFilledNew
+		}
+	}
+}
+
 // TODO заложить это в интерфейс Screen
 func DrawMainScreen(screen *ebiten.Image) {
 	//TODO не надо рисовать это каждый раз (или надо?)
@@ -342,40 +375,21 @@ func UpdateMainScreen() error {
 	if state.NeedToExit {
 		return errors.New("exiting")
 	}
+	timeBetweenUpdate = time.Second / time.Duration(FrameRate)
 	changeButtonName(fpsShowerLabel, fmt.Sprintf("%s: %d", fpsShowerLabelString, FrameRate))
 	ProcessDrawingDot()
 	clicker.ProcessSingleMouseClick(singleClickables)
 	clicker.ProcessLongMouseClick(longClickables)
-	ebiten.SetTPS(FrameRate)
+
 	if state.NeedToClearMatrix {
-		for i := 1; i < len(state.GameMatrix)-1; i++ {
-			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
-				state.GameMatrix[i][j].IsFilledOld = false
-				state.GameMatrix[i][j].IsFilledNew = false
-			}
-		}
+		clearMatrix()
 		state.NeedToClearMatrix = false
 	}
 	if !state.StopUpdateFlag {
 		changeButtonName(stopButton, "Stop")
-		for i := 1; i < len(state.GameMatrix)-1; i++ {
-			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
-				neighbours := CountOfNeighbours(state, i, j)
-				if state.GameMatrix[i][j].IsFilledOld {
-					if neighbours != 2 && neighbours != 3 {
-						state.GameMatrix[i][j].IsFilledNew = false
-					}
-				} else {
-					if neighbours == 3 {
-						state.GameMatrix[i][j].IsFilledNew = true
-					}
-				}
-			}
-		}
-		for i := 1; i < len(state.GameMatrix)-1; i++ {
-			for j := 1; j < len(state.GameMatrix[i])-1; j++ {
-				state.GameMatrix[i][j].IsFilledOld = state.GameMatrix[i][j].IsFilledNew
-			}
+		if time.Now().Sub(lastUpdate) > timeBetweenUpdate {
+			oneGameTick()
+			lastUpdate = time.Now()
 		}
 	} else {
 		changeButtonName(stopButton, "Start")

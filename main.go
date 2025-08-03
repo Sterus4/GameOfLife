@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	GameScreenWidth   = 1920
-	GameScreenHeight  = 1080
+	GameScreenWidth   = 640
+	GameScreenHeight  = 480
 	RealScreenSWidth  = 1920
 	RealScreenSHeight = 1080
 )
@@ -24,9 +24,7 @@ const (
 	GameStatusSettings
 )
 
-type Game struct {
-	isFullScreenMode bool
-}
+type Game struct{}
 
 func (g *Game) Update() error {
 	if err := game.UpdateMainScreen(); err != nil {
